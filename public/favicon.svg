@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Shopping Cart Body -->
+  <rect x="4" y="8" width="20" height="16" rx="2" fill="#3b82f6" stroke="#1e40af" stroke-width="1"/>
+  
+  <!-- Shopping Cart Handle -->
+  <path d="M8 8 L8 6 Q8 4 10 4 L18 4 Q20 4 20 6 L20 8" fill="none" stroke="#1e40af" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Shopping Cart Wheels -->
+  <circle cx="8" cy="22" r="2" fill="#1e40af"/>
+  <circle cx="20" cy="22" r="2" fill="#1e40af"/>
+  
+  <!-- Shopping Cart Contents (Gift Box) -->
+  <rect x="10" y="12" width="8" height="6" fill="#fbbf24" stroke="#d97706" stroke-width="0.5"/>
+  <rect x="12" y="13" width="4" height="4" fill="#10b981" stroke="#059669" stroke-width="0.5"/>
+  
+  <!-- Ribbon Bow -->
+  <circle cx="14" cy="15" r="1" fill="#ef4444"/>
+  <path d="M13 14 L13 16 M15 14 L15 16" stroke="#dc2626" stroke-width="1" stroke-linecap="round"/>
+</svg>
+
