@@ -1,10 +1,15 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Product } from "@/types/product";
+import { Product } from "@/services/productService";
 
 interface ProductCardProps {
   product: Product;
 }
+
+// Helper function to capitalize first letter for display
+const capitalizeFirstLetter = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
 
 const ProductCard = ({ product }: ProductCardProps) => {
   return (
@@ -20,7 +25,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <div className="flex items-start justify-between">
           <CardTitle className="text-lg line-clamp-2">{product.name}</CardTitle>
           <Badge variant="secondary" className="ml-2 shrink-0">
-            {product.category}
+            {capitalizeFirstLetter(product.category)}
           </Badge>
         </div>
         <div className="text-2xl font-bold text-primary">

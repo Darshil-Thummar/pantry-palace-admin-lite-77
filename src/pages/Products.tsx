@@ -5,11 +5,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import ProductCard from "@/components/ProductCard";
 import ProductForm from "@/components/ProductForm";
-import { getProducts, addProduct, updateProduct, deleteProduct } from "@/utils/productStorage";
-import { Product, ProductFormData } from "@/types/product";
-import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { productService, Product, ProductFormData } from "@/services/productService";
+import { toast } from "@/components/ui/sonner";
+import { Plus, Edit, Trash2 } from "lucide-react";
 
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -17,76 +15,57 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-  const navigate = useNavigate();
 
   useEffect(() => {
     loadProducts();
   }, []);
 
-  const loadProducts = () => {
-    const allProducts = getProducts();
-    setProducts(allProducts);
+  const loadProducts = async () => {
+    try {
+      setIsLoading(true);
+      const allProducts = await productService.getAllProducts();
+      setProducts(allProducts);
+    } catch (error) {
+      console.error('Error loading products:', error);
+      toast.error("Failed to load products");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = async (data: ProductFormData) => {
     setIsLoading(true);
     
-    setTimeout(() => {
-      try {
-        if (editingProduct) {
-          updateProduct(editingProduct.id, data);
-          toast({
-            title: "Product Updated",
-            description: "Product has been successfully updated.",
-          });
-        } else {
-          addProduct(data);
-          toast({
-            title: "Product Added",
-            description: "New product has been successfully added.",
-          });
-        }
-        
-        loadProducts();
-        setShowForm(false);
-        setEditingProduct(null);
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Something went wrong. Please try again.",
-          variant: "destructive",
-        });
+    try {
+      if (editingProduct) {
+        await productService.updateProduct(editingProduct._id, data);
+        toast.success("Product has been successfully updated.");
+      } else {
+        await productService.createProduct(data);
+        toast.success("New product has been successfully added.");
       }
+      
+      await loadProducts();
+      setShowForm(false);
+      setEditingProduct(null);
+    } catch (error: any) {
+      console.error('Error saving product:', error);
+      toast.error(error.message || "Something went wrong. Please try again.");
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleDelete = async (product: Product) => {
     try {
-      deleteProduct(product.id);
-      toast({
-        title: "Product Deleted",
-        description: `${product.name} has been removed.`,
-      });
-      loadProducts();
+      await productService.deleteProduct(product._id);
+      toast.success(`${product.name} has been removed.`);
+      await loadProducts();
       setDeletingProduct(null);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete product.",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      console.error('Error deleting product:', error);
+      toast.error(error.message || "Failed to delete product.");
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out.",
-    });
-    navigate("/");
   };
 
   const openEditForm = (product: Product) => {
@@ -113,16 +92,10 @@ const Products = () => {
             <h1 className="text-4xl font-bold">Admin Panel</h1>
             <p className="text-muted-foreground mt-2">Manage your product inventory</p>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={openAddForm} className="pantry-gradient">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Product
-            </Button>
-            <Button onClick={handleLogout} variant="outline">
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
-          </div>
+          <Button onClick={openAddForm} className="pantry-gradient">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Product
+          </Button>
         </div>
 
         {/* Stats */}
@@ -174,7 +147,7 @@ const Products = () => {
         {products.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
-              <div key={product.id} className="relative group">
+              <div key={product._id} className="relative group">
                 <ProductCard product={product} />
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                   <Button

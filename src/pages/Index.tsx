@@ -1,20 +1,29 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ProductCard from "@/components/ProductCard";
-import { getProducts } from "@/utils/productStorage";
 import { useState, useEffect } from "react";
-import { Product } from "@/types/product";
+import { Product } from "@/services/productService";
+import { productService } from "@/services/productService";
 import { Link } from "react-router-dom";
-import { Leaf, Shield, Truck, Heart } from "lucide-react";
+import { Leaf, Shield, Truck, Heart, Plus } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     // Load featured products (first 6)
-    const allProducts = getProducts();
-    setProducts(allProducts.slice(0, 6));
+    const loadFeaturedProducts = async () => {
+      try {
+        const allProducts = await productService.getAllProducts();
+        setProducts(allProducts.slice(0, 6));
+      } catch (error) {
+        console.error('Error loading featured products:', error);
+      }
+    };
+    loadFeaturedProducts();
   }, []);
 
   const features = [
@@ -68,6 +77,14 @@ const Index = () => {
                 Learn More
               </Button>
             </Link>
+            {isAuthenticated && (
+              <Link to="/products">
+                <Button size="lg" className="pantry-gradient text-lg px-8">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Product
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -111,9 +128,9 @@ const Index = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+                         {products.map((product) => (
+               <ProductCard key={product._id} product={product} />
+             ))}
           </div>
           <div className="text-center">
             <Link to="/gallery">

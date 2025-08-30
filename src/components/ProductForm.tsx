@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ProductFormData, Product } from "@/types/product";
+import { ProductFormData, Product } from "@/services/productService";
 
 interface ProductFormProps {
   product?: Product;
@@ -14,16 +14,16 @@ interface ProductFormProps {
 }
 
 const categories = [
-  "Fruits",
-  "Vegetables", 
-  "Dairy",
-  "Meat",
-  "Seafood",
-  "Bakery",
-  "Pantry",
-  "Frozen",
-  "Beverages",
-  "Snacks"
+  "fruit",
+  "vegetable",
+  "dairy",
+  "meat",
+  "seafood",
+  "bakery",
+  "pantry",
+  "frozen",
+  "beverages",
+  "snacks"
 ];
 
 const ProductForm = ({ product, onSubmit, onCancel, isLoading = false }: ProductFormProps) => {
@@ -31,17 +31,37 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading = false }: Product
     name: product?.name || "",
     category: product?.category || "",
     description: product?.description || "",
-    image: product?.image || "",
     price: product?.price || 0,
   });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>(product?.image || "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    const submitData = {
+      ...formData,
+      image: selectedFile || undefined,
+    };
+    onSubmit(submitData);
   };
 
-  const handleChange = (field: keyof ProductFormData, value: string | number) => {
+  const handleChange = (field: keyof Omit<ProductFormData, 'image'>, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      // Create preview URL for the selected file
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
+  const handleFileRemove = () => {
+    setSelectedFile(null);
+    setPreviewUrl(product?.image || "");
   };
 
   return (
@@ -68,11 +88,11 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading = false }: Product
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent>
-              {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
+                             {categories.map((category) => (
+                 <SelectItem key={category} value={category}>
+                   {category.charAt(0).toUpperCase() + category.slice(1)}
+                 </SelectItem>
+               ))}
             </SelectContent>
           </Select>
         </div>
@@ -93,14 +113,42 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading = false }: Product
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="image">Image URL</Label>
-        <Input
-          id="image"
-          value={formData.image}
-          onChange={(e) => handleChange("image", e.target.value)}
-          placeholder="https://example.com/image.jpg"
-          required
-        />
+        <Label htmlFor="image">Product Image</Label>
+        <div className="space-y-3">
+          <Input
+            id="image"
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="cursor-pointer"
+          />
+          
+          {previewUrl && (
+            <div className="space-y-2">
+              <div className="relative inline-block">
+                <img 
+                  src={previewUrl} 
+                  alt="Preview" 
+                  className="w-32 h-32 object-cover rounded-lg border"
+                />
+                {selectedFile && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
+                    onClick={handleFileRemove}
+                  >
+                    ×
+                  </Button>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {selectedFile ? `Selected: ${selectedFile.name}` : 'Current image'}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="space-y-2">

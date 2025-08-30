@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -15,7 +16,7 @@ const Register = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { register } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,34 +24,46 @@ const Register = () => {
 
     // Basic validation
     if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
+      toast.error("Passwords do not match");
       setIsLoading(false);
       return;
     }
 
     if (formData.password.length < 6) {
-      toast({
-        title: "Error", 
-        description: "Password must be at least 6 characters",
-        variant: "destructive",
-      });
+      toast.error("Password must be at least 6 characters");
       setIsLoading(false);
       return;
     }
 
-    // Simulate registration (since this is UI only)
-    setTimeout(() => {
-      toast({
-        title: "Success",
-        description: "Account created successfully! You can now login as admin.",
+    try {
+      console.log('Register page: Attempting registration...');
+      console.log('Register page: Form data:', formData);
+      
+      const response = await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
       });
-      navigate("/");
+
+      console.log('Register page: Registration successful, navigating to login...');
+      toast.success(response.message || "Account created successfully! Please login to continue.");
+      
+      // Add a small delay to ensure toast is visible before navigation
+      setTimeout(() => {
+        console.log('Register page: About to navigate to login page');
+        console.log('Register page: Current location:', window.location.pathname);
+        navigate("/login", { replace: true });
+        console.log('Register page: Navigation completed');
+        console.log('Register page: New location:', window.location.pathname);
+      }, 1000);
+      
+    } catch (error: any) {
+      console.error('Register page: Registration failed:', error);
+      toast.error(error.message || "Failed to create account");
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,7 +151,7 @@ const Register = () => {
                 Already have an account?{" "}
                 <button
                   type="button"
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/login")}
                   className="text-primary hover:underline"
                 >
                   Go to Login
