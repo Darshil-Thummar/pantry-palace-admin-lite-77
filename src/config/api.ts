@@ -16,6 +16,7 @@ export const API_CONFIG = {
   BASE_URL: getApiBaseUrl(),
   PRODUCTS_ENDPOINT: '/product',
   AUTH_ENDPOINT: '/user',
+  CART_ENDPOINT: '/cart',
 };
 
 export const getApiUrl = (endpoint: string) => `${API_CONFIG.BASE_URL}${endpoint}`;

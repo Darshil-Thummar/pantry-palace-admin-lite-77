@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -6,19 +7,38 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import ProductCard from "@/components/ProductCard";
 import ProductForm from "@/components/ProductForm";
 import { productService, Product, ProductFormData } from "@/services/productService";
+import { useRequireAuth } from "@/hooks/useAuthRedirect";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, RefreshCw } from "lucide-react";
 
 const Products = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Check authentication and redirect if needed
+  const { isAuthenticated, isLoading: authLoading } = useRequireAuth();
 
   useEffect(() => {
     loadProducts();
   }, []);
+
+  useEffect(() => {
+    // Check if there's an edit parameter in the URL
+    const editId = searchParams.get('edit');
+    if (editId && products.length > 0) {
+      const productToEdit = products.find(p => p._id === editId);
+      if (productToEdit) {
+        setEditingProduct(productToEdit);
+        setShowForm(true);
+        // Remove the edit parameter from URL
+        setSearchParams({});
+      }
+    }
+  }, [searchParams, products, setSearchParams]);
 
   const loadProducts = async () => {
     try {
@@ -83,6 +103,34 @@ const Products = () => {
     setEditingProduct(null);
   };
 
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen py-16">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Card className="w-full max-w-md text-center">
+              <CardHeader>
+                <div className="mx-auto mb-4 w-16 h-16 bg-muted rounded-full flex items-center justify-center">
+                  <RefreshCw className="w-8 h-8 text-muted-foreground animate-spin" />
+                </div>
+                <CardTitle className="text-2xl">Checking Authentication...</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Please wait while we verify your login status.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated, this will redirect to login automatically
+  // The useRequireAuth hook handles the redirect
+
   return (
     <div className="min-h-screen py-16">
       <div className="container mx-auto px-4">
@@ -124,7 +172,7 @@ const Products = () => {
                 Average Price
               </CardTitle>
               <div className="text-2xl font-bold">
-                ${products.length > 0 
+                ₹{products.length > 0 
                   ? (products.reduce((sum, p) => sum + p.price, 0) / products.length).toFixed(2)
                   : '0.00'
                 }

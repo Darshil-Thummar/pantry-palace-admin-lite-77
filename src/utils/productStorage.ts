@@ -5,7 +5,7 @@ const STORAGE_KEY = "pantry_palace_products";
 // Mock initial products
 const initialProducts: Product[] = [
   {
-    id: "1",
+    _id: "1",
     name: "Fresh Organic Apples",
     category: "Fruits",
     description: "Crisp and sweet organic apples, perfect for snacking or baking.",
@@ -15,7 +15,7 @@ const initialProducts: Product[] = [
     updatedAt: new Date().toISOString(),
   },
   {
-    id: "2", 
+    _id: "2", 
     name: "Organic Baby Spinach",
     category: "Vegetables",
     description: "Fresh, tender baby spinach leaves perfect for salads and smoothies.",
@@ -25,7 +25,7 @@ const initialProducts: Product[] = [
     updatedAt: new Date().toISOString(),
   },
   {
-    id: "3",
+    _id: "3",
     name: "Artisan Whole Grain Bread",
     category: "Bakery",
     description: "Freshly baked whole grain bread with seeds and grains.",
@@ -35,7 +35,7 @@ const initialProducts: Product[] = [
     updatedAt: new Date().toISOString(),
   },
   {
-    id: "4",
+    _id: "4",
     name: "Fresh Salmon Fillet",
     category: "Seafood",
     description: "Premium Atlantic salmon fillet, sustainably sourced.",
@@ -45,7 +45,7 @@ const initialProducts: Product[] = [
     updatedAt: new Date().toISOString(),
   },
   {
-    id: "5",
+    _id: "5",
     name: "Greek Yogurt",
     category: "Dairy",
     description: "Creamy Greek yogurt with live cultures, high in protein.",
@@ -55,7 +55,7 @@ const initialProducts: Product[] = [
     updatedAt: new Date().toISOString(),
   },
   {
-    id: "6",
+    _id: "6",
     name: "Organic Bananas",
     category: "Fruits",
     description: "Sweet and ripe organic bananas, great for smoothies.",
@@ -82,7 +82,7 @@ export const saveProducts = (products: Product[]): void => {
 export const addProduct = (productData: ProductFormData): Product => {
   const products = getProducts();
   const newProduct: Product = {
-    id: Date.now().toString(),
+    _id: Date.now().toString(),
     ...productData,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -94,7 +94,7 @@ export const addProduct = (productData: ProductFormData): Product => {
 
 export const updateProduct = (id: string, productData: ProductFormData): Product => {
   const products = getProducts();
-  const index = products.findIndex(p => p.id === id);
+  const index = products.findIndex(p => p._id === id);
   if (index === -1) throw new Error("Product not found");
   
   const updatedProduct: Product = {
@@ -109,11 +109,11 @@ export const updateProduct = (id: string, productData: ProductFormData): Product
 
 export const deleteProduct = (id: string): void => {
   const products = getProducts();
-  const filteredProducts = products.filter(p => p.id !== id);
+  const filteredProducts = products.filter(p => p._id !== id);
   saveProducts(filteredProducts);
 };
 
 export const getProductById = (id: string): Product | undefined => {
   const products = getProducts();
-  return products.find(p => p.id === id);
+  return products.find(p => p._id === id);
 };

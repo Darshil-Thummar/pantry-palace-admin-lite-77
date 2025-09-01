@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { ShoppingCart, Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { isAuthenticated, logout } = useAuth();
+  const { state: cart } = useCart();
 
   const navigation = [
     { name: "Home", href: "/" },
@@ -43,10 +45,22 @@ const Navbar = () => {
                 </Button>
               </Link>
             ))}
+            {/* Cart Icon */}
+            <Link to="/cart" className="relative ml-4">
+              <Button variant="outline" size="sm" className="relative">
+                <ShoppingCart className="w-5 h-5" />
+                {cart.items.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                    {cart.items.length}
+                  </span>
+                )}
+              </Button>
+            </Link>
+            
             {isAuthenticated ? (
               <>
                 <Link to="/products">
-                  <Button className="ml-4 pantry-gradient">
+                  <Button className="ml-2 pantry-gradient">
                     Products
                   </Button>
                 </Link>
@@ -60,7 +74,7 @@ const Navbar = () => {
               </>
             ) : (
               <Link to="/login">
-                <Button className="ml-4 pantry-gradient">
+                <Button className="ml-2 pantry-gradient">
                   Login
                 </Button>
               </Link>
@@ -92,6 +106,20 @@ const Navbar = () => {
                   </Button>
                 </Link>
               ))}
+              
+              {/* Cart Link for Mobile */}
+              <Link to="/cart" onClick={() => setIsOpen(false)}>
+                <Button variant="outline" className="w-full justify-start relative">
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Cart
+                  {cart.items.length > 0 && (
+                    <span className="ml-auto bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                      {cart.items.length}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+              
               {isAuthenticated ? (
                 <>
                   <Link to="/products" onClick={() => setIsOpen(false)}>

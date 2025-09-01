@@ -22,22 +22,22 @@ const Login = () => {
       console.log('Login page: Email:', email);
       console.log('Login page: Password length:', password.length);
       
-      await login({
+      const redirectPath = await login({
         email,
         password,
       });
 
-      console.log('Login page: Login successful, navigating to products...');
+      console.log('Login page: Login successful, redirecting to:', redirectPath);
       toast.success("Welcome back!");
       
       // Add debugging for navigation
-      console.log('Login page: About to navigate to /products');
+      console.log('Login page: About to navigate to:', redirectPath);
       console.log('Login page: Current location:', window.location.pathname);
       
       // Add a small delay to ensure toast is visible and debug timing
       setTimeout(() => {
         console.log('Login page: Executing navigation after delay');
-        navigate("/products");
+        navigate(redirectPath);
         console.log('Login page: Navigation completed');
         console.log('Login page: New location:', window.location.pathname);
       }, 500);

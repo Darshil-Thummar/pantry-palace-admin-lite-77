@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService, LoginPayload, RegisterPayload, AuthResponse } from '@/services/authService';
+import { getIntendedRedirect, clearIntendedRedirect } from '@/utils/redirectUtils';
 
 interface User {
   id: string;
@@ -11,7 +12,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (payload: LoginPayload) => Promise<void>;
+  login: (payload: LoginPayload) => Promise<string>; // Return redirect path
   register: (payload: RegisterPayload) => Promise<AuthResponse>;
   logout: () => void;
 }
@@ -46,7 +47,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  const login = async (payload: LoginPayload) => {
+  const login = async (payload: LoginPayload): Promise<string> => {
     try {
       console.log('AuthContext: Attempting login with:', payload);
       const response = await authService.login(payload);
@@ -60,6 +61,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('AuthContext: User logged in successfully:', response.user);
         console.log('AuthContext: Token stored:', response.token);
         console.log('AuthContext: User state updated:', response.user);
+        
+        // Get the intended redirect destination
+        const redirectPath = getIntendedRedirect();
+        console.log('AuthContext: Redirecting to:', redirectPath);
+        
+        return redirectPath;
       } else {
         console.log('AuthContext: Login failed - missing required data');
         console.log('AuthContext: Response success:', response.success);
@@ -99,6 +106,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     console.log('AuthContext: Logging out user');
     authService.logout();
     setUser(null);
+    // Clear any saved redirect when logging out
+    clearIntendedRedirect();
   };
 
   const value: AuthContextType = {

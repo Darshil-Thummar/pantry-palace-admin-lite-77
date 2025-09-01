@@ -29,7 +29,7 @@ const categories = [
 const ProductForm = ({ product, onSubmit, onCancel, isLoading = false }: ProductFormProps) => {
   const [formData, setFormData] = useState<ProductFormData>({
     name: product?.name || "",
-    category: product?.category || "",
+    category: product?.category || "fruit",
     description: product?.description || "",
     price: product?.price || 0,
   });
@@ -82,7 +82,8 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading = false }: Product
           <Label htmlFor="category">Category</Label>
           <Select 
             value={formData.category} 
-            onValueChange={(value) => handleChange("category", value)}
+            onValueChange={(value) => value && handleChange("category", value)}
+            required
           >
             <SelectTrigger>
               <SelectValue placeholder="Select category" />
@@ -99,7 +100,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading = false }: Product
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="price">Price ($)</Label>
+        <Label htmlFor="price">Price (₹)</Label>
         <Input
           id="price"
           type="number"
