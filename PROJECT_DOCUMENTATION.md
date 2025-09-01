@@ -313,3 +313,4 @@ The project showcases:
 This documentation serves as a comprehensive guide for understanding, maintaining, and extending the Pantry Palace Admin system.
 
 
+
